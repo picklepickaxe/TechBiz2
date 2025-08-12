@@ -18,7 +18,6 @@ import {
   CheckCircle,
   ArrowRight,
   ChevronLeft,
-  AlertCircle,
   Download,
 } from "lucide-react";
 

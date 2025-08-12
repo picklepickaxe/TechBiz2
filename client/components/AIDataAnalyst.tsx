@@ -14,7 +14,7 @@ import {
   Brain,
   Send,
   Loader2,
-  MessageSquare,
+
   Lightbulb,
   TrendingUp,
   AlertCircle,
@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 interface AIDataAnalystProps {
-  dataset: any[];
+  dataset: Array<Record<string, unknown>>;
   datasetName: string;
   datasetDescription: string;
 }

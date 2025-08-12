@@ -1,13 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import {
-  Sparkles,
   Wand2,
-  Star,
   MessageCircle,
-  ArrowRight,
   X,
   Send,
   Bot,
@@ -15,8 +11,6 @@ import {
 
 export default function BusinessWizard() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [currentTip, setCurrentTip] = useState(0);
-  const [showTip, setShowTip] = useState(true);
   const [showTooltip, setShowTooltip] = useState(false);
   const [isFirstVisit, setIsFirstVisit] = useState(true);
   const [messages, setMessages] = useState([]);
@@ -71,13 +65,6 @@ export default function BusinessWizard() {
     timestamp: new Date(),
   });
 
-  const wizardTips = [
-    "💡 Did you know? MSME registration gives you access to 200+ government schemes!",
-    "🚀 Startups with DPIIT recognition get 3 years of income tax exemption!",
-    "⚡ GST registration can be completed online in just 3-5 days!",
-    "🎯 Professional tax varies by state - Delhi has competitive rates!",
-    "🏆 Shop & Establishment license is mandatory for all commercial setups!",
-  ];
 
   const aiResponses = {
     // Business Registration
@@ -151,13 +138,6 @@ export default function BusinessWizard() {
       "I can help you with business registration, MSME benefits, GST registration, startup schemes, government licensing, compliance requirements, and business analytics. Could you be more specific about what you'd like to know?",
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTip((prev) => (prev + 1) % wizardTips.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
@@ -278,7 +258,6 @@ export default function BusinessWizard() {
             <Button
               onClick={() => {
                 setIsExpanded(true);
-                setShowTip(false);
                 setShowTooltip(false);
               }}
               onMouseEnter={() => !isFirstVisit && setShowTooltip(true)}
