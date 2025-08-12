@@ -683,6 +683,71 @@ async function askQuestion() {
             </div>
 
             {/* AI Analysis Results */}
+             
+            <div id="ai-analyst" className="mb-8">
+  <h2 className="text-2xl font-bold text-foreground mb-6">
+    AI Data Analyst
+  </h2>
+  <AIDataAnalyst
+    dataset={currentDataset.data}
+    datasetName={currentDataset.name}
+    datasetDescription={currentDataset.description}
+  />
+</div>
+
+<div className="mt-6 max-w-3xl mx-auto">
+  <div
+    className="border rounded-md p-4 h-64 overflow-y-auto bg-white dark:bg-gray-800"
+    style={{ minHeight: "250px" }}
+  >
+    {chatMessages.length === 0 && (
+      <p className="text-muted-foreground text-center mt-24">
+        Ask questions about your uploaded dataset below!
+      </p>
+    )}
+
+    {chatMessages.map((msg, i) => (
+      <div
+        key={i}
+        className={`mb-3 p-2 rounded ${
+          msg.sender === "user"
+            ? "bg-blue-100 text-blue-900 text-right"
+            : "bg-gray-100 text-gray-900 text-left"
+        }`}
+      >
+        <p>{msg.text}</p>
+      </div>
+    ))}
+
+    <div ref={chatEndRef} />
+  </div>
+
+  <form
+    className="mt-4 flex gap-2"
+    onSubmit={(e) => {
+      e.preventDefault();
+      askQuestion();
+    }}
+  >
+    <input
+      type="text"
+      placeholder="Type your question here..."
+      value={userQuestion}
+      onChange={(e) => setUserQuestion(e.target.value)}
+      disabled={loadingAnswer}
+      className="flex-1 border rounded p-2"
+    />
+    <button
+      type="submit"
+      disabled={loadingAnswer || !userQuestion.trim()}
+      className="bg-blue-600 text-white px-4 rounded disabled:opacity-50"
+    >
+      {loadingAnswer ? "Thinking..." : "Ask"}
+    </button>
+  </form>
+</div>
+
+
             {aiAnalysisVisible && aiAnalysis[selectedDataset] && (
               <div className="grid md:grid-cols-4 gap-6 mb-8">
                 <Card>
