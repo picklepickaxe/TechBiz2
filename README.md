@@ -12,7 +12,7 @@ Main features include:
 3. **Regulatory Help** – Simplify understanding licenses, permits, and compliance requirements.  
 4. **Resource Hub** – Access curated tools and guides to support business growth.  
 
-TechBizz aims to empower entrepreneurs with practical, easy-to-use resources without overwhelming them with complexity.
+TechBiz aims to empower entrepreneurs with practical, easy-to-use resources without overwhelming them with complexity.
 
 **Evaluation Criteria**:
 - User-friendly interface and smooth navigation  
