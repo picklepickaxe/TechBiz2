@@ -37,6 +37,7 @@ import {
   Users,
   FileText,
   AlertCircle,
+  MessageCircle,
 } from "lucide-react";
 import {
   BarChart,
