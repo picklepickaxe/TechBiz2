@@ -2,76 +2,80 @@
 
 import { useState } from "react";
 
-export default function AnalyticsPage() {
-  const [file, setFile] = useState<File | null>(null);
+export default function Analytics() {
   const [insights, setInsights] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]);
     }
   };
 
   const handleAnalyze = async () => {
-    if (!file) {
-      setError("Please upload a CSV file.");
-      return;
-    }
-    setError(null);
     setLoading(true);
     setInsights(null);
 
     try {
-      const text = await file.text();
+      if (file) {
+        // CSV upload path
+        const text = await file.text();
+        const res = await fetch("/.netlify/functions/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ csvData: text }),
+        });
 
-      const response = await fetch("/.netlify/functions/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ csvData: text }),
-      });
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
+        const data = await res.json();
+        setInsights(data.insights || "No insights returned.");
+      } else {
+        // Original sample data path
+        const sampleData = `
+          Product,Sales,Region
+          Widget A,100,North
+          Widget B,150,South
+          Widget C,200,East
+        `;
+
+        const res = await fetch("/.netlify/functions/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ csvData: sampleData }),
+        });
+
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+
+        const data = await res.json();
+        setInsights(data.insights || "No insights returned.");
       }
-
-      const result = await response.json();
-      setInsights(result.insights || "No insights generated.");
     } catch (err: any) {
-      console.error(err);
-      setError("Failed to analyze dataset.");
+      setInsights(`Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-4 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Data Analytics</h1>
+    <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
+      <h1>Data Insights</h1>
+      <p>
+        Upload a CSV file for analysis, or leave it blank to use the built-in
+        sample dataset.
+      </p>
 
-      <input
-        type="file"
-        accept=".csv"
-        onChange={handleFileChange}
-        className="mb-4"
-      />
+      <input type="file" accept=".csv" onChange={handleFileChange} />
 
-      <button
-        onClick={handleAnalyze}
-        disabled={!file || loading}
-        className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
-      >
-        {loading ? "Analyzing..." : "Analyze CSV"}
+      <button onClick={handleAnalyze} disabled={loading} style={{ marginTop: "10px" }}>
+        {loading ? "Analyzing..." : "Get Insights"}
       </button>
 
-      {error && <p className="text-red-500 mt-2">{error}</p>}
-
       {insights && (
-        <div className="mt-6 p-4 bg-gray-100 rounded">
-          <h2 className="text-lg font-semibold mb-2">Insights</h2>
-          <p>{insights}</p>
+        <div style={{ marginTop: "20px" }}>
+          <h2>Insights</h2>
+          <pre>{insights}</pre>
         </div>
       )}
     </div>
