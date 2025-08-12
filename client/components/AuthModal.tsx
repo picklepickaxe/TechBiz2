@@ -6,7 +6,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
+
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -24,7 +24,6 @@ import {
   Phone,
   Eye,
   EyeOff,
-  Sparkles,
 } from "lucide-react";
 
 interface AuthModalProps {

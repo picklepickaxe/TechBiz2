@@ -1,14 +1,9 @@
 import { RequestHandler } from "express";
 import OpenAI from "openai";
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export interface AIAnalysisRequest {
   question: string;
-  dataset: any[];
+  dataset: Array<Record<string, unknown>>;
   datasetName: string;
   datasetDescription: string;
 }
@@ -74,8 +69,9 @@ Please provide:
 4. Any trends or patterns you notice`;
 
     // Call OpenAI API
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }

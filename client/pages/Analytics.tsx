@@ -7,7 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -34,7 +33,6 @@ import {
   Target,
   DollarSign,
   Calendar,
-  Users,
   FileText,
   AlertCircle,
   MessageCircle,
@@ -55,13 +53,6 @@ import {
   Pie,
   AreaChart,
   Area,
-  ScatterChart,
-  Scatter,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
 } from "recharts";
 
 export default function Analytics() {
@@ -420,7 +411,7 @@ export default function Analytics() {
           </ResponsiveContainer>
         );
 
-      case "pie":
+      case "pie": {
         const pieData = Object.keys(data[0])
           .slice(1)
           .map((key, index) => ({
@@ -452,6 +443,7 @@ export default function Analytics() {
             </RechartsPieChart>
           </ResponsiveContainer>
         );
+      }
 
       default:
         return <div>Chart type not supported</div>;

@@ -20,15 +20,10 @@ import { useState } from "react";
 import {
   Building2,
   Search,
-  Filter,
   ArrowRight,
   ChevronLeft,
-  Users,
-  DollarSign,
-  Clock,
   CheckCircle,
   Star,
-  TrendingUp,
 } from "lucide-react";
 
 export default function Schemes() {
