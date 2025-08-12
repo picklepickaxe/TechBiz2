@@ -1,9 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
-import Papa from "papaparse"; // at the top if not already imported
-import { useState, useRef } from "react";
-
-
 import {
   Card,
   CardContent,
@@ -23,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import AIDataAnalyst from "@/components/AIDataAnalyst";
 import {
   Building2,
@@ -73,96 +70,7 @@ export default function Analytics() {
   );
   const [aiAnalysisVisible, setAiAnalysisVisible] = useState(false);
 
-  const [uploadedData, setUploadedData] = useState(null);
-const [uploadedDataName, setUploadedDataName] = useState("");
-const [chatMessages, setChatMessages] = useState([]); // { sender: 'user'|'bot', text: string }
-const [userQuestion, setUserQuestion] = useState("");
-const [loadingAnswer, setLoadingAnswer] = useState(false);
-
-const fileInputRef = useRef(null);
-const chatEndRef = useRef(null);
-
-function handleFileUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
-    alert("Please upload a valid CSV file.");
-    return;
-  }
-
-  Papa.parse(file, {
-    header: true,
-    skipEmptyLines: true,
-    complete: function (results) {
-      setUploadedData(results.data);
-      setUploadedDataName(file.name);
-      setChatMessages([]);
-      // optionally clear or reset other states
-    },
-    error: function (error) {
-      alert("Error parsing CSV: " + error.message);
-    },
-  });
-}
-
-function datasetToSummary(data) {
-  if (!data || data.length === 0) return "Dataset is empty.";
-
-  const keys = Object.keys(data[0]);
-  let summary = `The dataset has ${data.length} rows and ${keys.length} columns: ${keys.join(", ")}.\nExample rows:\n`;
-
-  data.slice(0, 5).forEach((row, i) => {
-    summary += `Row ${i + 1}: `;
-    summary += keys.map((k) => `${k} = ${row[k]}`).join(", ");
-    summary += "\n";
-  });
-
-  return summary;
-}
-
-async function askQuestion() {
-  if (!userQuestion.trim()) return;
-  if (!uploadedData || uploadedData.length === 0) {
-    alert("Please upload a dataset first.");
-    return;
-  }
-
-  setLoadingAnswer(true);
-
-  setChatMessages((prev) => [...prev, { sender: "user", text: userQuestion }]);
-
-  const datasetSummary = datasetToSummary(uploadedData);
-
-  try {
-    const res = await fetch("/api/gpt-query", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        datasetSummary,
-        question: userQuestion,
-      }),
-    });
-
-    if (!res.ok) throw new Error(`Server error: ${res.statusText}`);
-
-    const data = await res.json();
-
-    setChatMessages((prev) => [...prev, { sender: "bot", text: data.answer }]);
-  } catch (error) {
-    setChatMessages((prev) => [
-      ...prev,
-      { sender: "bot", text: `Error: ${error.message}` },
-    ]);
-  } finally {
-    setLoadingAnswer(false);
-    setUserQuestion("");
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }
-}
-
-
-  // Example datasets for business analytics
+ // Example datasets for business analytics
   const datasets = {
     "business-registrations": {
       name: "Business Registration Trends",
@@ -389,7 +297,7 @@ async function askQuestion() {
     },
   };
 
-  const currentDataset = datasets[selectedDataset];
+const currentDataset = datasets[selectedDataset];
 
   const COLORS = ["#1174ba", "#205ba6", "#2f4b92", "#3e3b7e", "#4d2b6a"];
 
@@ -545,7 +453,7 @@ async function askQuestion() {
           </ResponsiveContainer>
         );
 
-      default:
+     default:
         return <div>Chart type not supported</div>;
     }
   };
@@ -634,23 +542,10 @@ async function askQuestion() {
                     {currentDataset.description}
                   </p>
                   <div className="flex gap-2">
-                    <Button
-  variant="outline"
-  size="sm"
-  onClick={() => fileInputRef.current?.click()}
->
-  <Upload className="h-4 w-4 mr-2" />
-  Upload Data (CSV only)
-</Button>
-
-<input
-  type="file"
-  accept=".csv,text/csv"
-  style={{ display: "none" }}
-  ref={fileInputRef}
-  onChange={handleFileUpload}
-/>
-
+                    <Button variant="outline" size="sm">
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Data
+                    </Button>
                     <Button variant="outline" size="sm">
                       <Download className="h-4 w-4 mr-2" />
                       Export
@@ -683,71 +578,6 @@ async function askQuestion() {
             </div>
 
             {/* AI Analysis Results */}
-             
-            <div id="ai-analyst" className="mb-8">
-  <h2 className="text-2xl font-bold text-foreground mb-6">
-    AI Data Analyst
-  </h2>
-  <AIDataAnalyst
-    dataset={currentDataset.data}
-    datasetName={currentDataset.name}
-    datasetDescription={currentDataset.description}
-  />
-</div>
-
-<div className="mt-6 max-w-3xl mx-auto">
-  <div
-    className="border rounded-md p-4 h-64 overflow-y-auto bg-white dark:bg-gray-800"
-    style={{ minHeight: "250px" }}
-  >
-    {chatMessages.length === 0 && (
-      <p className="text-muted-foreground text-center mt-24">
-        Ask questions about your uploaded dataset below!
-      </p>
-    )}
-
-    {chatMessages.map((msg, i) => (
-      <div
-        key={i}
-        className={`mb-3 p-2 rounded ${
-          msg.sender === "user"
-            ? "bg-blue-100 text-blue-900 text-right"
-            : "bg-gray-100 text-gray-900 text-left"
-        }`}
-      >
-        <p>{msg.text}</p>
-      </div>
-    ))}
-
-    <div ref={chatEndRef} />
-  </div>
-
-  <form
-    className="mt-4 flex gap-2"
-    onSubmit={(e) => {
-      e.preventDefault();
-      askQuestion();
-    }}
-  >
-    <input
-      type="text"
-      placeholder="Type your question here..."
-      value={userQuestion}
-      onChange={(e) => setUserQuestion(e.target.value)}
-      disabled={loadingAnswer}
-      className="flex-1 border rounded p-2"
-    />
-    <button
-      type="submit"
-      disabled={loadingAnswer || !userQuestion.trim()}
-      className="bg-blue-600 text-white px-4 rounded disabled:opacity-50"
-    >
-      {loadingAnswer ? "Thinking..." : "Ask"}
-    </button>
-  </form>
-</div>
-
-
             {aiAnalysisVisible && aiAnalysis[selectedDataset] && (
               <div className="grid md:grid-cols-4 gap-6 mb-8">
                 <Card>
@@ -851,60 +681,17 @@ async function askQuestion() {
                 </Card>
               </div>
             )}
-
-            {/* AI Data Analyst Section */}
-            <div className="mt-6 max-w-3xl mx-auto">
-  <div
-    className="border rounded-md p-4 h-64 overflow-y-auto bg-white dark:bg-gray-800"
-    style={{ minHeight: "250px" }}
-  >
-    {chatMessages.length === 0 && (
-      <p className="text-muted-foreground text-center mt-24">
-        Ask questions about your uploaded dataset below!
-      </p>
-    )}
-
-    {chatMessages.map((msg, i) => (
-      <div
-        key={i}
-        className={`mb-3 p-2 rounded ${
-          msg.sender === "user"
-            ? "bg-blue-100 text-blue-900 text-right"
-            : "bg-gray-100 text-gray-900 text-left"
-        }`}
-      >
-        <p>{msg.text}</p>
-      </div>
-    ))}
-
-    <div ref={chatEndRef} />
-  </div>
-
-  <form
-    className="mt-4 flex gap-2"
-    onSubmit={(e) => {
-      e.preventDefault();
-      askQuestion();
-    }}
-  >
-    <input
-      type="text"
-      placeholder="Type your question here..."
-      value={userQuestion}
-      onChange={(e) => setUserQuestion(e.target.value)}
-      disabled={loadingAnswer}
-      className="flex-1 border rounded p-2"
-    />
-    <button
-      type="submit"
-      disabled={loadingAnswer || !userQuestion.trim()}
-      className="bg-blue-600 text-white px-4 rounded disabled:opacity-50"
-    >
-      {loadingAnswer ? "Thinking..." : "Ask"}
-    </button>
-  </form>
-</div>
-
+ {/* AI Data Analyst Section */}
+            <div id="ai-analyst" className="mb-8">
+              <h2 className="text-2xl font-bold text-foreground mb-6">
+                AI Data Analyst
+              </h2>
+              <AIDataAnalyst
+                dataset={currentDataset.data}
+                datasetName={currentDataset.name}
+                datasetDescription={currentDataset.description}
+              />
+            </div>
 
             {/* Chart Visualizations */}
             <Tabs defaultValue="bar" className="space-y-6">
