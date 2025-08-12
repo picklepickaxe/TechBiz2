@@ -1,9 +1,9 @@
-# TechBizz - Startup & Business Assistant Platform
+# TechBiz - Startup & Business Assistant Platform
 
 **Live Demo:** [View on Netlify](https://techbizz-nsutideathon.netlify.app/)
 
 ## Description
-TechBizz is a web application designed to assist young and budding entrepreneurs by simplifying the process of starting and managing a business. It offers key features such as business idea validation, regulatory guidance, resource management, and more—all presented through a clean and intuitive user interface.
+TechBiz is a web application designed to assist young and budding entrepreneurs by simplifying the process of starting and managing a business. It offers key features such as business idea validation, regulatory guidance, resource management, and more—all presented through a clean and intuitive user interface.
 
 Main features include:
 
