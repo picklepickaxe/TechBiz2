@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { createServer } from "./server";
 
+// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
@@ -14,9 +15,10 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: "dist/spa",
-    rollupOptions: {
-      external: ["papaparse"], // Add this line here
-    },
+    // Remove 'external' here or make sure papaparse is NOT in it
+    // rollupOptions: {
+    //   external: [], 
+    // },
   },
   plugins: [react(), expressPlugin()],
   resolve: {
@@ -39,4 +41,3 @@ function expressPlugin(): Plugin {
     },
   };
 }
-
