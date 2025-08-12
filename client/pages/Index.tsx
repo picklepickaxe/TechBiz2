@@ -8,8 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import SimpleAuthModal from "@/components/SimpleAuthModal";
+import { useAuthModal } from "@/context/AuthContext";
 import ThemeToggle from "@/components/ThemeToggle";
 import BusinessWizard from "@/components/BusinessWizard";
 import {
@@ -27,11 +26,7 @@ import {
 } from "lucide-react";
 
 export default function Index() {
-  const [authModal, setAuthModal] = useState<{
-    isOpen: boolean;
-    type: "login" | "signup";
-  }>({ isOpen: false, type: "login" });
-
+  const { openModal } = useAuthModal();
   const features = [
     {
       icon: <Building2 className="h-6 w-6" />,
@@ -110,14 +105,14 @@ export default function Index() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setAuthModal({ isOpen: true, type: "login" })}
+                onClick={() => openModal("login")}
                 className="border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300"
               >
                 Log In
               </Button>
               <Button
                 size="sm"
-                onClick={() => setAuthModal({ isOpen: true, type: "signup" })}
+                onClick={() => openModal("signup")}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 Sign Up
@@ -337,13 +332,6 @@ export default function Index() {
 
       {/* Business Wizard */}
       <BusinessWizard />
-
-      {/* Auth Modal */}
-      <SimpleAuthModal
-        isOpen={authModal.isOpen}
-        onClose={() => setAuthModal({ isOpen: false, type: "login" })}
-        defaultTab={authModal.type}
-      />
 
       {/* Footer */}
       <footer className="bg-muted text-foreground py-16 border-t border-border/20">

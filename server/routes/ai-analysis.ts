@@ -1,14 +1,26 @@
 import { RequestHandler } from "express";
 import OpenAI from "openai";
+import multer from "multer";
+import csv from "csv-parser";
+import xlsx from "xlsx";
+import { Readable } from "stream";
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy-load OpenAI client to avoid errors during server startup
+function getOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.");
+  }
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
+
+// Configure multer for in-memory file storage
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 export interface AIAnalysisRequest {
   question: string;
-  dataset: any[];
   datasetName: string;
   datasetDescription: string;
 }
@@ -19,21 +31,56 @@ export interface AIAnalysisResponse {
   error?: string;
 }
 
+const parseFile = (file: Express.Multer.File): Promise<any[]> => {
+  return new Promise((resolve, reject) => {
+    const results: any[] = [];
+    const readableStream = new Readable();
+    readableStream._read = () => {}; // _read is required
+    readableStream.push(file.buffer);
+    readableStream.push(null);
+
+    if (file.mimetype === "text/csv" || file.originalname.endsWith(".csv")) {
+      readableStream
+        .pipe(csv())
+        .on("data", (data) => results.push(data))
+        .on("end", () => resolve(results))
+        .on("error", (error) => reject(error));
+    } else if (
+      file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      file.originalname.endsWith(".xlsx")
+    ) {
+      try {
+        const workbook = xlsx.read(file.buffer, { type: "buffer" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const json = xlsx.utils.sheet_to_json(worksheet);
+        resolve(json);
+      } catch (error) {
+        reject(error);
+      }
+    } else {
+      reject(new Error("Unsupported file type. Please upload a CSV or XLSX file."));
+    }
+  });
+};
+
 export const handleAIAnalysis: RequestHandler = async (req, res) => {
   try {
-    const { question, dataset, datasetName, datasetDescription }: AIAnalysisRequest = req.body;
-
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(500).json({
-        error: "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.",
-      });
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded." });
     }
+
+    const dataset = await parseFile(req.file);
+    const { question, datasetName, datasetDescription }: AIAnalysisRequest = req.body;
 
     if (!question || !dataset || !Array.isArray(dataset)) {
       return res.status(400).json({
-        error: "Missing required fields: question and dataset are required.",
+        error: "Missing required fields: question and a valid dataset file are required.",
       });
     }
+
+    // Get OpenAI client (lazy-loaded)
+    const openai = getOpenAIClient();
 
     // Prepare the dataset summary for the AI
     const datasetSummary = {
@@ -155,3 +202,5 @@ function extractInsights(response: string): string[] {
   
   return insights.slice(0, 5); // Limit to 5 key insights
 }
+
+export const uploadMiddleware = upload.single("dataset");
