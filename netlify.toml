@@ -1,7 +1,10 @@
 [build]
-  command = "npm run build:client"
+  command = "npm run build"
   functions = "netlify/functions"
   publish = "dist/spa"
+
+[context.production.environment]
+  OPENAI_API_KEY = "YOUR_OPENAI_API_KEY"
 
 
 [functions]
